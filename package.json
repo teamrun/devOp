@@ -2,9 +2,10 @@
   "name": "devOp",
   "version": "0.0.1",
   "description": "my deploy tool for vps, with es6 and nodemailer",
-  "main": "service.js",
+  "main": "app.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "start": "node app.js"
   },
   "repository": {
     "type": "git",
@@ -21,12 +22,18 @@
   },
   "homepage": "https://github.com/teamrun/devOp",
   "dependencies": {
+    "bragi": "0.0.10",
     "co": "^3.0.5",
-    "log4js": "^0.6.14",
-    "thunkify": "^2.1.1",
+    "co-body": "0.0.1",
     "koa": "^0.5.5",
-    "nodemailer": "^0.6.3",
     "koa-router": "^3.1.3",
-    "co-body": "0.0.1"
+    "log4js": "^0.6.14",
+    "mkdirp": "^0.5.0",
+    "nodemailer": "^0.6.3",
+    "should": "^4.0.4",
+    "thunkify": "^2.1.1"
+  },
+  "devDependencies": {
+    "rmdir": "^1.0.4"
   }
 }

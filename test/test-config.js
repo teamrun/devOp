@@ -1,33 +1,15 @@
-var config = {
-    blog: {
-        gitRepo: '',
-        cmd: {
-            build: 'gulp',
-            run: 'pm2 app.js'
-        },
-        path: ''
-    },
-    vc: {
-        gitRepo: '',
-        cmd: {
-            build: 'gulp',
-            run: 'node app.js'
-        },
-        path: ''
-    },
-    devops: {
-        gitRepo: '',
-        cmd: {
-            build: '',
-            run: 'node app.js',
-            start: 'pm2 app.js',
-            restart: ''
-        }
-    }
-};
+// format
 
-// will create these folder / soft-link under path
-// track
-// backup
-// current
-// running
+var config = [
+  {
+    name: 'test for devops',
+    // abs path, start with / or ~
+    path: '~/Documents/dev/LIB/tt',
+    main: 'app.js',
+    repo: 'https://github.com/teamrun/test-devops.git',
+    args: '--harmony'
+  }
+];
+
+
+module.exports = config;

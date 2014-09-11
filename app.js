@@ -1,43 +1,50 @@
-var cmd = require('child_process').spawn;
+var fs = require('fs');
+var path = require('path');
+var run = require('child_process').spawnSync;
+var logger = require('bragi');
+var log = logger.log;
 
-// cmd();
+var config = require('./test/test-config')
 
-var i=0;
-var restartTime = 0;
-setInterval(function(){
-  console.log(i++);
-  var pm2List = cmd('pm2', ['jlist']);
-  pm2List.stdout.on('data', function(data){
-    var resultJSON = JSON.parse(data.toString());
-    restartTime = resultJSON[0].pm2_env.restart_time;
-  });
-}, 5*1000);
+var base = require('./lib/base');
+var setup = require('./lib/setup');
+var update = require('./lib/update');
 
 
+// 使config中的路径
 
-var http = require('http');
 
-var server = http.createServer(function(req, res){
-  res.writeHead(200, {'Content-Type': 'text/plain'});
-  res.end('Hello World!\n ' + restartTime);
+config.forEach(function(app, i, arr){
+  if(app.lastDeploy === false){
+    // 如果上次没部署成功, 这次就不再弄了, 解决了问题再重新来一次
+    return;
+  }
+  if(!base.normalizeAppPath(app)){
+    app.lastDeploy = false;
+    log('err', 'app: "', app.name, '" config error', 'wrong app.path. path should start with / or ~ ');
+    return;
+  }
+  // 闭包
+  var stage = base.isDeployed(app);
+
+  var startCmd = 'start';
+  if( stage === false){
+    app.lastDeploy = false;
+    return false;
+  }
+  if( stage === 0){
+    log('dev', 'got stage 0, gonna setup and deploy');
+    setup(app);
+  }
+  else if( stage === 1 ){
+    log('dev', 'get stage 1, gonna use pm2 start')
+    // startCmd
+  }
+  // 2
+  else{
+    log('dev', 'get stage 1, gonna use pm2 restart')
+    startCmd = 'restart';
+    // pm2ID = 
+  }
+  // update
 });
-
-var port = 3030;
-
-if( process.argv[2] ){
-  port = process.argv[2];
-}
-
-server.listen(port);
-
-console.log('server listen ing at: ', port);
-console.log(__filename);
-
-
-// clone or pull
-// check is any updates
-// npm install
-// build
-// copy
-// change soft link
-// move to backup folder
