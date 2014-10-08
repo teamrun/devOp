@@ -1,50 +1,67 @@
-var fs = require('fs');
-var path = require('path');
-var run = require('child_process').spawnSync;
 var logger = require('bragi');
 var log = logger.log;
 
-var config = require('./test/test-config')
+var config = require('./test/test-config');
 
 var base = require('./lib/base');
 var setup = require('./lib/setup');
 var update = require('./lib/update');
-
-
-// 使config中的路径
+var deployHook = require('./lib/deployHook');
+var deploy = require('./lib/deploy');
 
 
 config.forEach(function(app, i, arr){
   if(app.lastDeploy === false){
     // 如果上次没部署成功, 这次就不再弄了, 解决了问题再重新来一次
-    return;
+    log('err', 'last deploy failed... contact admin asap...');
+    return false;
   }
   if(!base.normalizeAppPath(app)){
     app.lastDeploy = false;
     log('err', 'app: "', app.name, '" config error', 'wrong app.path. path should start with / or ~ ');
     return;
   }
-  // 闭包
+  
   var stage = base.isDeployed(app);
 
-  var startCmd = 'start';
   if( stage === false){
     app.lastDeploy = false;
     return false;
   }
+
+  var needToDeloy = false;
+  var deloyType = '';
+
   if( stage === 0){
     log('dev', 'got stage 0, gonna setup and deploy');
     setup(app);
+
+    needToDeloy = true;
+    deloyType = 'start';
   }
-  else if( stage === 1 ){
-    log('dev', 'get stage 1, gonna use pm2 start')
-    // startCmd
-  }
-  // 2
   else{
-    log('dev', 'get stage 1, gonna use pm2 restart')
-    startCmd = 'restart';
-    // pm2ID = 
+    if( stage === 1 ){
+      log('dev', 'get stage 1, gonna use pm2 start')
+
+      needToDeloy = true;
+      deloyType = 'start';
+    }
+    // 2
+    else{
+      log('dev', 'get stage 1, gonna use pm2 restart')
+      
+      deloyType = 'restart';
+      needToDeloy = update(app);
+      // pm2ID = 
+    }
   }
-  // update
+  
+  // pre deploy
+  if(needToDeloy){
+    var beforeResult = deployHook.before(app);
+    if( beforeResult ){
+      deploy.deploy( app );
+    }
+    // return beforeResult;
+  }
 });

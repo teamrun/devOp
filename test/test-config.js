@@ -7,7 +7,9 @@ var config = [
     path: '~/Documents/dev/LIB/tt',
     main: 'app.js',
     repo: 'https://github.com/teamrun/test-devops.git',
-    args: '--harmony'
+    args: '--harmony',
+    beforeDeploy: ['npm install', 'gulp'],
+    afterDeploy: []
   }
 ];
 
