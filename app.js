@@ -60,7 +60,10 @@ config.forEach(function(app, i, arr){
   if(needToDeloy){
     var beforeResult = deployHook.before(app);
     if( beforeResult ){
-      deploy.deploy( app );
+      // 部署, 其实很简单: copy, change 软连接
+      if( deploy.deploy( app ) ){
+        // 执行重启命令
+      }
     }
     // return beforeResult;
   }

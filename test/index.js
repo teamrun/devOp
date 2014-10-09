@@ -22,9 +22,12 @@ var deployHook = require('../lib/deployHook');
 var deploy = require('../lib/deploy');
 
 
-describe('inital setup and deploy', function(){
+base.normalizeAppPath(testApp);
+
+// describe.skip('inital setup and deploy: ', function(){
+describe('inital setup and deploy: ', function(){
   before(function(done){
-    base.normalizeAppPath(testApp);
+    ;
     rmdir(testApp.path, function(err){
       done();
     });
@@ -36,7 +39,7 @@ describe('inital setup and deploy', function(){
   });
 
   it('should return true after setup', function(){
-    this.timeout(30*1000);
+    this.timeout(60*1000);
     var r = setup(testApp);
     r.should.be.ok;
   });
@@ -47,8 +50,11 @@ describe('inital setup and deploy', function(){
   });
 
   // check update after initial should get false
-  it('check update after initial should get false', function(){
-    update( testApp ).should.be.not.ok;
+  it('check update after setup should get false', function(){
+    this.timeout(60*1000)
+    var updateResult = update( testApp );
+    log('test', updateResult);
+    updateResult.should.be.not.ok;
   });
 
   // execute before hook and
@@ -62,9 +68,16 @@ describe('inital setup and deploy', function(){
     deploy.deploy(testApp).should.be.ok;
   });
 
-//  after(function(done){
-//    rmdir(testApp.path, function(err){
-//      done();
-//    });
-//  });
+  it('after deploy, should be able to start app at folder.running', function(){
+    this.timeout(10*1000);
+    deploy.reStartApp(testApp, 'start').should.be.ok;
+  });
+});
+
+
+describe('检测到正在运行, 更新 -> 重启部署', function(){
+  it('应该检测到正在运行', function(){
+    var r = base.isDeployed(testApp);
+    r.should.be.equal(2);
+  });
 });
