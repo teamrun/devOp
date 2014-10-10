@@ -1,5 +1,6 @@
 var should = require('should');
 var logger = require('bragi');
+var pm2 = require('pm2');
 
 //不显示除test组外的所有log
 // test: 测试里的log
@@ -24,13 +25,16 @@ var deploy = require('../lib/deploy');
 
 base.normalizeAppPath(testApp);
 
+// 异步调用...
+pm2.connect();
+
 // describe.skip('inital setup and deploy: ', function(){
-describe('inital setup and deploy: ', function(){
+describe.skip('inital setup and deploy: ', function(){
   before(function(done){
-    ;
     rmdir(testApp.path, function(err){
       done();
     });
+    pm2.delete('all', function(){});
   });
 
   it('should return 0 stage when there is no "track" and "running" folder', function(){
@@ -68,16 +72,31 @@ describe('inital setup and deploy: ', function(){
     deploy.deploy(testApp).should.be.ok;
   });
 
-  it('after deploy, should be able to start app at folder.running', function(){
+  it('after deploy, should be able to start app at folder.running', function(done){
     this.timeout(10*1000);
-    deploy.reStartApp(testApp, 'start').should.be.ok;
+    deploy.reStartApp(testApp, 'start', function(err, proc){
+      (!!err).should.be.not.ok;
+      // log('dev', proc);
+      done();
+    });
   });
 });
 
 
 describe('检测到正在运行, 更新 -> 重启部署', function(){
-  it('应该检测到正在运行', function(){
-    var r = base.isDeployed(testApp);
-    r.should.be.equal(2);
+  it('应该检测到正在运行', function(done){
+    this.timeout(5*1000);
+    setTimeout(function(){
+      var r = base.isDeployed(testApp);
+      r.should.be.equal(2);
+      done();
+    }, 300)
+  });
+
+  it('should be able to restart app', function(done){
+    deploy.reStartApp(testApp, 'restart', function(err){
+      (!!err).should.be.not.ok;
+      done();
+    });
   });
 });

@@ -1,6 +1,9 @@
 // format
 
-var config = [
+var config = {};
+config.env = 'dev';
+
+config.apps= [
   {
     name: 'test for devops',
     // abs path, start with / or ~
@@ -8,9 +11,8 @@ var config = [
     main: 'app.js',
     repo: 'https://github.com/teamrun/test-devops.git',
     args: '--harmony',
-    beforeDeploy: ['npm install', 'gulp'],
-    start: 'pm2 start app.js',
-    restart: 'pm2 restart app.js',
+    beforeDeploy: ['cnpm install', 'gulp'],
+    appFile: 'app.js',
     afterDeploy: []
   }
 ];
